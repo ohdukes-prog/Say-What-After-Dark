@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Say Whaaaat? - Spicy Edition</title>
+    <title>Say What? - Restricted Edition</title>
     <style>
         :root {
             --bg: #000000;
@@ -65,10 +65,11 @@
         }
 
         #word-display {
-            font-size: clamp(2rem, 10vw, 5rem);
+            font-size: clamp(1.8rem, 9vw, 4rem);
             font-weight: 900;
             text-align: center;
             text-transform: uppercase;
+            line-height: 1.1;
         }
 
         #drink-alert {
@@ -115,7 +116,7 @@
 </head>
 <body>
 
-<header><h1>SAY WHAAAT!? AFTER DARK</h1></header>
+<header><h1>SAY WHAT? AFTER DARK</h1></header>
 <div class="category-bar" id="cat-bar"></div>
 
 <div class="game-screen" id="screen">
@@ -140,14 +141,19 @@
 
 <script>
     const gameData = {
-        "🌶️ SPICY": ["Morning Glory", "Deep Dish", "Hard as a rock", "Taco Tuesday", "Cream Pie", "Just the tip", "Going down", "Backdoor Action", "Moist", "Whip it out", "Full Release", "Double Team"],
-        "🔥 ADULT": ["Tequila Shots", "Walk of Shame", "Mile High Club", "Dirty Martini", "Lap Dance", "Friends with Benefits", "Safe Word", "Skinny Dipping", "Sexting my ex", "Body Shot"],
-        "🎬 MOVIES": ["Interstellar", "The Lion King", "Jurassic Park", "Harry Potter", "Spider-Man", "Finding Nemo", "The Matrix", "Top Gun", "Shrek", "Titanic"],
-        "💃 ACTIONS": ["Walking the dog", "Eating a lemon", "Driving a car", "Taking a shower", "Brushing teeth", "Mowing the lawn", "Directing traffic"],
-        "🌮 FOOD": ["Chimichanga", "Spaghetti", "Guacamole", "Marshmallow", "Pineapple Pizza", "Hummus", "Artichoke"]
+        "🎬 MOVIES (R)": [
+            "Fifty Shades of Grey", "Basic Instinct", "Eyes Wide Shut", "Magic Mike", "Wolf of Wall Street", "American Pie", "Cruel Intentions", "Showgirls", "Brokeback Mountain", "Wild Things", "Unfaithful", "Secretary", "Boogie Nights", "Last Tango in Paris", "Blue is the Warmest Color", "The Dreamers", "Indecent Proposal", "Fatal Attraction", "Body Heat", "Knocked Up", "No Strings Attached", "Friends with Benefits", "9 1/2 Weeks", "Mulholland Drive", "Y Tu Mamá También", "The Reader", "Vicky Cristina Barcelona", "Bound", "Swimming Pool", "Quills", "Nymphomaniac", "Don Jon", "Shame", "Exotica", "The Graduate", "Basic Instinct 2", "Sliver", "Disclosure", "Poison Ivy", "American Gigolo"
+        ],
+        "🌶️ SPICY": [
+            "Morning Glory", "Deep Dish", "Hard as a rock", "Taco Tuesday", "Cream Pie", "Just the tip", "Going down", "Backdoor Action", "Moist", "Whip it out", "Full Release", "Double Team", "Handy Andy", "Meat Curtains", "Pearl Necklace", "Sausage Party", "Stiff One", "Ball Sack", "Dong", "Sugar Daddy", "Motorboat", "Happy Ending", "Quickie", "Blow Job", "Toss My Salad", "Camel Toe", "Beaver", "Pipe Down", "Woody", "Handlebars", "Bush", "Plunger", "Taint", "Glory Hole", "Joystick", "Head First", "Lollipop", "Peach", "Cucumber", "Banana"
+        ],
+        "🔥 ADULT": [
+            "Tequila Shots", "Walk of Shame", "Mile High Club", "Dirty Martini", "Lap Dance", "Friends with Benefits", "Safe Word", "Skinny Dipping", "Sexting my ex", "Body Shot", "Beer Bong", "Threesome", "Handcuffs", "Blindfold", "Roleplay", "Strip Poker", "Drunk Texting", "Hangover", "One Night Stand", "Golden Shower", "Fetish", "Domination", "Submissive", "Bondage", "Safe Sex", "Afterglow", "Porn Star", "Red Light District", "Dirty Talk", "Foreplay", "G-Spot", "Lube", "Condom", "Vibrator", "Handy", "Stoned", "Blackout", "Chaser", "Draft Beer", "On the Rocks"
+        ],
+        "💃 ACTIONS": ["Walking the dog", "Eating a lemon", "Driving a car", "Taking a shower", "Brushing teeth", "Mowing the lawn", "Directing traffic"]
     };
 
-    let currentCat = "🌶️ SPICY";
+    let currentCat = "🎬 MOVIES (R)";
     let usedWords = [];
     let scores = { A: 0, B: 0 };
 
@@ -180,8 +186,7 @@
         const drinkAlert = document.getElementById('drink-alert');
         drinkAlert.style.display = "none";
 
-        // 15% chance of a drink alert
-        if(Math.random() < 0.15) {
+        if(Math.random() < 0.12) {
             drinkAlert.style.display = "block";
             return;
         }
