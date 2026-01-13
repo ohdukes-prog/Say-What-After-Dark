@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Say Whaaaat? - Spicy Edition</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --card-bg: #111111;
+            --accent: #00f2ff;
+            --text: #ffffff;
+            --team-a: #ff007b;
+            --team-b: #00ff88;
+            --spicy: #ff1493;
+            --adult: #ff4500;
+            --drink: #ffcc00;
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header { padding: 10px; text-align: center; border-bottom: 1px solid #333; }
+        h1 { margin: 0; font-size: 1rem; letter-spacing: 2px; color: var(--accent); }
+
+        .category-bar {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+            gap: 10px;
+            background: #0a0a0a;
+        }
+
+        .cat-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 15px;
+            border-radius: 12px;
+            white-space: nowrap;
+            font-size: 0.8rem;
+        }
+
+        .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+        .cat-btn.spicy-mode.active { background: var(--spicy); border-color: var(--spicy); }
+        .cat-btn.adult-mode.active { background: var(--adult); border-color: var(--adult); }
+
+        .game-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        #word-display {
+            font-size: clamp(2rem, 10vw, 5rem);
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        #drink-alert {
+            position: absolute;
+            background: var(--drink);
+            color: black;
+            padding: 20px 40px;
+            font-size: 3rem;
+            font-weight: 900;
+            border-radius: 20px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 0 50px var(--drink);
+        }
+
+        .main-action { padding: 20px; display: flex; justify-content: center; }
+        #next-btn {
+            background: var(--accent);
+            color: black;
+            border: none;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            border-radius: 100px;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-around;
+            background: var(--card-bg);
+            padding: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .score-box { text-align: center; }
+        .score-val { font-size: 1.5rem; font-weight: bold; margin-bottom: 5px; }
+        .plus-btn { background: #333; border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; }
+        
+        .flash { animation: flash-bg 0.1s; }
+        @keyframes flash-bg { 0% { background: #444; } 100% { background: #000; } }
+    </style>
+</head>
+<body>
+
+<header><h1>SAY WHAAAT!? AFTER DARK</h1></header>
+<div class="category-bar" id="cat-bar"></div>
+
+<div class="game-screen" id="screen">
+    <div id="drink-alert">🍻 DRINK!</div>
+    <div id="word-display">TAP TO START</div>
+</div>
+
+<div class="main-action">
+    <button id="next-btn" onclick="nextWord()">NEXT WORD</button>
+</div>
+
+<div class="scoreboard">
+    <div class="score-box">
+        <div class="score-val" id="scoreA" style="color: var(--team-a)">0</div>
+        <button class="plus-btn" onclick="addPoint('A')">A+</button>
+    </div>
+    <div class="score-box">
+        <div class="score-val" id="scoreB" style="color: var(--team-b)">0</div>
+        <button class="plus-btn" onclick="addPoint('B')">B+</button>
+    </div>
+</div>
+
+<script>
+    const gameData = {
+        "🌶️ SPICY": ["Morning Glory", "Deep Dish", "Hard as a rock", "Taco Tuesday", "Cream Pie", "Just the tip", "Going down", "Backdoor Action", "Moist", "Whip it out", "Full Release", "Double Team"],
+        "🔥 ADULT": ["Tequila Shots", "Walk of Shame", "Mile High Club", "Dirty Martini", "Lap Dance", "Friends with Benefits", "Safe Word", "Skinny Dipping", "Sexting my ex", "Body Shot"],
+        "🎬 MOVIES": ["Interstellar", "The Lion King", "Jurassic Park", "Harry Potter", "Spider-Man", "Finding Nemo", "The Matrix", "Top Gun", "Shrek", "Titanic"],
+        "💃 ACTIONS": ["Walking the dog", "Eating a lemon", "Driving a car", "Taking a shower", "Brushing teeth", "Mowing the lawn", "Directing traffic"],
+        "🌮 FOOD": ["Chimichanga", "Spaghetti", "Guacamole", "Marshmallow", "Pineapple Pizza", "Hummus", "Artichoke"]
+    };
+
+    let currentCat = "🌶️ SPICY";
+    let usedWords = [];
+    let scores = { A: 0, B: 0 };
+
+    const catBar = document.getElementById('cat-bar');
+    Object.keys(gameData).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.innerText = cat;
+        btn.className = 'cat-btn' + (cat === currentCat ? ' active' : '');
+        if(cat === "🌶️ SPICY") btn.classList.add('spicy-mode');
+        if(cat === "🔥 ADULT") btn.classList.add('adult-mode');
+        btn.onclick = () => {
+            currentCat = cat;
+            usedWords = [];
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('word-display').innerText = "NEW DECK";
+            setBtnColor();
+        };
+        catBar.appendChild(btn);
+    });
+
+    function setBtnColor() {
+        let btn = document.getElementById('next-btn');
+        if(currentCat === "🌶️ SPICY") btn.style.background = "var(--spicy)";
+        else if(currentCat === "🔥 ADULT") btn.style.background = "var(--adult)";
+        else btn.style.background = "var(--accent)";
+    }
+
+    function nextWord() {
+        const drinkAlert = document.getElementById('drink-alert');
+        drinkAlert.style.display = "none";
+
+        // 15% chance of a drink alert
+        if(Math.random() < 0.15) {
+            drinkAlert.style.display = "block";
+            return;
+        }
+
+        const words = gameData[currentCat];
+        if (usedWords.length >= words.length) usedWords = [];
+        let available = words.filter(w => !usedWords.includes(w));
+        let pick = available[Math.floor(Math.random() * available.length)];
+        usedWords.push(pick);
+
+        document.getElementById('word-display').innerText = pick;
+        document.getElementById('screen').classList.add('flash');
+        setTimeout(() => document.getElementById('screen').classList.remove('flash'), 100);
+    }
+
+    function addPoint(team) {
+        scores[team]++;
+        document.getElementById(`score${team}`).innerText = scores[team];
+    }
+    
+    setBtnColor();
+</script>
+</body>
+</html>
